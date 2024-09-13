@@ -410,6 +410,9 @@ process_tile <- function(tile_id) {
   raster_name_l3 <- paste0("vhm_q3_",tile_name_l3)
   hm.ezg[paste0("vhm_q3_",res_l3)] <- sample_raster(hm.ezg,tile_output_folder_l3,raster_name_l3,"tif")
   
+  #Mixing degree
+  raster_name_l2 <- paste0("mg_",tile_name_l2)
+  hm.ezg[paste0("mg_",res_l2)] <- sample_raster(hm.ezg,tile_output_folder_l2,raster_name_l2,"tif")
   
   # #Precipitation
   raster_name_l3 <- paste0("prcp_60m_2a",tile_name_l3)
@@ -762,7 +765,7 @@ processRockpoints <- function(input_path, output_path){
   
 }
 
-processRockpoints("./data/hmdb_sampled_slope_unrestricted_proportional.csv","./../hmdb_sampled_slope_unrestricted_proportional_modified.csv")
+processRockpoints("./data/hmdb_sampled_slope_unrestricted_proportional_checked.csv","./../hmdb_sampled_slope_unrestricted_proportional_checked_modified.csv")
 
 
 #
@@ -844,7 +847,7 @@ nrow(hm.res)
 slide_out_path <-"./../SpontRutschBE.csv"
 write.csv(hm.res,slide_out_path, row.names = FALSE)
 
-processRockpoints("./data/be_sampled_slope_unrestricted_proportional.csv","./../be_sampled_slope_unrestricted_proportional_modified.csv")
+processRockpoints("./data/be_sampled_slope_unrestricted_proportional_checked.csv","./../be_sampled_slope_unrestricted_proportional_checked_modified.csv")
 
 
 #

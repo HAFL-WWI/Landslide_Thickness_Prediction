@@ -987,7 +987,7 @@ topscale_tiles <- function (dem, tile_extent, tile_output_extent, tile_folder, t
 process_dem_tiled(dem = dem_resampled_file_name_l1, tile_data = tile_data, tile_folder = tile_folder_path, tile_name_template = tile_name_template, tile_id_name = tile_id_name, proc_func = topscale_tiles, tile_buffer = 500,  n.cores = n.cores)
 
 #
-# Cut tiles with geomorphon (needs to be processed with QGIS/GRASS beforehand)
+# Generate tiles with geomorphon (needs to be processed with QGIS/GRASS beforehand)
 #
 
 geomorphon_tiles <- function (dem, tile_extent, tile_output_extent, tile_folder, tile_name_template, tile_id, fargs) {
@@ -1025,6 +1025,7 @@ geomorphon_tiles <- function (dem, tile_extent, tile_output_extent, tile_folder,
   dem_geomorphon_scale2_name <- clip_convert(dem_geomorphon_scale2_name,tile_output_extent,delete_input=TRUE)
   
 }
+
 process_dem_tiled(dem = dem_resampled_file_name_l1, tile_data = tile_data, tile_folder = tile_folder_path, tile_name_template = tile_name_template, tile_id_name = tile_id_name, proc_func = geomorphon_tiles, tile_buffer = 500,  n.cores = n.cores)
 
 #
@@ -1325,6 +1326,36 @@ h_vhm_tiles <- function (dem, tile_extent, tile_output_extent, tile_folder, tile
 process_dem_tiled(dem = r.vhm, tile_data = tile_data, tile_folder = tile_folder_path, tile_name_template = tile_name_template, tile_id_name = tile_id_name, proc_func = h_vhm_tiles, tile_buffer = 500,  n.cores = n.cores, fargs = res_l1)
 process_dem_tiled(dem = r.vhm, tile_data = tile_data, tile_folder = tile_folder_path, tile_name_template = tile_name_template_l2, tile_id_name = tile_id_name, proc_func = h_vhm_tiles, tile_buffer = 500,  n.cores = n.cores, fargs = res_l2)
 process_dem_tiled(dem = r.vhm, tile_data = tile_data, tile_folder = tile_folder_path, tile_name_template = tile_name_template_l3, tile_id_name = tile_id_name, proc_func = h_vhm_tiles, tile_buffer = 500,  n.cores = n.cores, fargs = res_l3)
+
+#
+# Generate tiles based on the mixing degree
+#
+r.mg <- "E:/GIS_Projekte/FINT-CH/MG2020_0306_oneRF_S1S2_AS_DEM_LV95.tif"
+
+# r.mg <- raster(r.mg)
+mg_tiles <- function (dem, tile_extent, tile_output_extent, tile_folder, tile_name_template, tile_id, fargs) {
+  dir.create(tile_folder)
+  
+  #dem <- rast(dem)
+  
+  extent_buf <- tile_extent+100
+  
+  target_res <- fargs
+  
+  gdal_path <- "C:/OSGeo4W64/OSGeo4W.bat  "
+  gdal_cmd_template <- "%s gdalwarp -overwrite -tr %s %s  -co COMPRESS=LZW -dstnodata 0 -te %s %s %s %s -r %s -of GTiff %s %s "
+  
+  mg_output_name <- paste0("mg_",tile_name_template,".tif")
+  mg_output_path <- file.path(tile_folder, mg_output_name)
+  gdalwarp(srcfile=normalizePath(dem),dstfile=normalizePath(mg_output_path),of="GTiff",tr=c(target_res,target_res),te=c(tile_extent[1] , tile_extent[3], tile_extent[2], tile_extent[4]),overwrite = TRUE,co=c("TILED=YES","BIGTIFF=YES","COMPRESS=DEFLATE"))
+  
+  clip_inplace(mg_output_path,tile_output_extent)
+  
+  return(mg_output_path)
+}
+
+process_dem_tiled(dem = r.mg, tile_data = tile_data, tile_folder = tile_folder_path, tile_name_template = tile_name_template_l2, tile_id_name = tile_id_name, proc_func = mg_tiles, tile_buffer = 500,  n.cores = n.cores, fargs = res_l2)
+
 
 #
 # Generate tiles based on the SAGA "Topographic Wetness Index (TWI)" tool
